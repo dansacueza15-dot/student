@@ -86,7 +86,7 @@ export default function Dashboard({ students }: Props) {
             <Head title="Dashboard" />
 
             <div className="space-y-6 p-4">
-                <div className="rounded-xl border border-sidebar-border bg-white p-6 shadow-sm dark:bg-slate-900">
+                <div className="rounded-xl border border-sidebar-border p-6 shadow-sm">
                     <h1 className="text-2xl font-semibold">Student Dashboard</h1>
                     <p className="mt-1 text-sm text-muted-foreground">
                         Manage student records and keep the list updated in real time.
@@ -96,7 +96,7 @@ export default function Dashboard({ students }: Props) {
                 <div className="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
                     <form
                         onSubmit={handleSubmit}
-                        className="rounded-xl border border-sidebar-border bg-white p-6 shadow-sm dark:bg-slate-900"
+                        className="rounded-xl border border-sidebar-border p-6 shadow-sm"
                     >
                         <div className="mb-5 flex items-center justify-between">
                             <h2 className="text-xl font-semibold">
@@ -178,17 +178,17 @@ export default function Dashboard({ students }: Props) {
                         </div>
                     </form>
 
-                    <div className="rounded-xl border border-sidebar-border bg-white p-6 shadow-sm dark:bg-slate-900">
+                    <div className="rounded-xl border border-sidebar-border p-6 shadow-sm">
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Student List</h2>
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                            <span className="rounded-full px-3 py-1 text-sm text-slate-700 dark:text-slate-200">
                                 {students.length} total
                             </span>
                         </div>
 
-                        <div className="overflow-hidden rounded-lg border">
+                        <div className="overflow-hidden rounded-lg border border-transparent">
                             <table className="min-w-full divide-y divide-border text-left text-sm">
-                                <thead className="bg-muted/40">
+                                <thead className="bg-transparent">
                                     <tr>
                                         <th className="px-4 py-3 font-medium">Name</th>
                                         <th className="px-4 py-3 font-medium">ID</th>
@@ -197,7 +197,7 @@ export default function Dashboard({ students }: Props) {
                                         <th className="px-4 py-3 font-medium text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-border bg-white dark:bg-slate-900">
+                                <tbody className="divide-y divide-border bg-transparent">
                                     {students.length === 0 ? (
                                         <tr>
                                             <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
