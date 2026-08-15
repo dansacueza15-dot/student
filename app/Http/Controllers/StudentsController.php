@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\students;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class StudentsController extends Controller
 {
@@ -12,15 +14,9 @@ class StudentsController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return Inertia::render('dashboard', [
+            'students' => students::latest()->get(),
+        ]);
     }
 
     /**
@@ -28,23 +24,17 @@ class StudentsController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $data = $request->validate([
+            'student_name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('students', 'email')],
+            'ID_number' => ['required', 'integer', Rule::unique('students', 'ID_number')],
+            'course' => 'required|string|max:255',
+            'year_level' => 'required|string|max:255',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(students $students)
-    {
-        //
-    }
+        students::create($data);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(students $students)
-    {
-        //
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -52,7 +42,17 @@ class StudentsController extends Controller
      */
     public function update(Request $request, students $students)
     {
-        //
+        $data = $request->validate([
+            'student_name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('students', 'email')->ignore($students->id)],
+            'ID_number' => ['required', 'integer', Rule::unique('students', 'ID_number')->ignore($students->id)],
+            'course' => 'required|string|max:255',
+            'year_level' => 'required|string|max:255',
+        ]);
+
+        $students->update($data);
+
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -60,6 +60,8 @@ class StudentsController extends Controller
      */
     public function destroy(students $students)
     {
-        //
+        $students->delete();
+
+        return redirect()->route('dashboard');
     }
 }
