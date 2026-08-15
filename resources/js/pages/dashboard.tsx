@@ -1,12 +1,21 @@
-import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head } from '@inertiajs/react';
+import {
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    updateDoc,
+} from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { db } from '@/lib/firebase';
 import { dashboard } from '@/routes';
 
 type Student = {
-    id: number;
+    id: string | number;
     student_name: string;
     email: string;
     ID_number: number;
@@ -26,13 +35,25 @@ const emptyForm = {
     year_level: '',
 };
 
-export default function Dashboard({ students }: Props) {
+export default function Dashboard({ students: initialStudents }: Props) {
     const [form, setForm] = useState(emptyForm);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<string | number | null>(null);
+    const [students, setStudents] = useState<Student[]>(initialStudents);
 
-    const handleChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
+    useEffect(() => {
+        const unsubscribe = onSnapshot(collection(db, 'students'), (snapshot) => {
+            const nextStudents = snapshot.docs.map((studentDoc) => ({
+                id: studentDoc.id,
+                ...(studentDoc.data() as Omit<Student, 'id'>),
+            }));
+
+            setStudents(nextStudents);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setForm((current) => ({ ...current, [name]: value }));
     };
@@ -42,7 +63,7 @@ export default function Dashboard({ students }: Props) {
         setEditingId(null);
     };
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const payload = {
@@ -50,18 +71,17 @@ export default function Dashboard({ students }: Props) {
             ID_number: Number(form.ID_number),
         };
 
-        if (editingId !== null) {
-            router.put(`/students/${editingId}`, payload, {
-                preserveScroll: true,
-                onSuccess: () => resetForm(),
-            });
-            return;
-        }
+        try {
+            if (editingId !== null) {
+                await updateDoc(doc(db, 'students', String(editingId)), payload);
+            } else {
+                await addDoc(collection(db, 'students'), payload);
+            }
 
-        router.post('/students', payload, {
-            preserveScroll: true,
-            onSuccess: () => resetForm(),
-        });
+            resetForm();
+        } catch (error) {
+            console.error('Error saving student:', error);
+        }
     };
 
     const handleEdit = (student: Student) => {
@@ -75,10 +95,12 @@ export default function Dashboard({ students }: Props) {
         });
     };
 
-    const handleDelete = (student: Student) => {
-        router.delete(`/students/${student.id}`, {
-            preserveScroll: true,
-        });
+    const handleDelete = async (student: Student) => {
+        try {
+            await deleteDoc(doc(db, 'students', String(student.id)));
+        } catch (error) {
+            console.error('Error deleting student:', error);
+        }
     };
 
     return (
